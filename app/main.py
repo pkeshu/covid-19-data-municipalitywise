@@ -14,6 +14,11 @@ columns = [
         "title": "Case Count",
         "sortable": True,
     },
+    {
+        "field": "district",
+        "title": "District",
+        "sortable": True,
+    }
 ]
 
 
@@ -25,16 +30,22 @@ def test():
     municipality = requests.get('https://data.nepalcorona.info/api/v1/municipals')
     data_municiple = municipality.json()
 
+    district = requests.get('https://data.nepalcorona.info/api/v1/districts')
+    data_district = district.json()
+
     data = []
 
     for c in data_covid['municipality']['cases']:
         for m in data_municiple:
-            if m.get('id') == c.get('municipality'):
-                d = {
-                    'name': m.get('title_ne'),
-                    'case_count': c.get('count')
-                }
-                data.append(d)
+            for d in data_district:
+                if d.get('id') == m.get('district'):
+                    if m.get('id') == c.get('municipality'):
+                        d = {
+                            'name': m.get('title_ne'),
+                            'case_count': c.get('count'),
+                            'district': d.get('title_ne')
+                        }
+                        data.append(d)
 
     return render_template('table_list.html', data=data, columns=columns, title='Municipality wise data')
 
